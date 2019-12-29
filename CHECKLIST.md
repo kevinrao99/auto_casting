@@ -1,0 +1,3 @@
+- Audition numbers are cleaned to unique integers
+- All Yes/No columns are indeed Yes/No, e.g. not YES/NO
+- All dance names are properly loaded with assign_dance_ids
