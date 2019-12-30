@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 import classes
 
 global dance_to_id
@@ -12,6 +13,27 @@ def get_dance_id(name): # given the dance name returns an integer corresponding 
 		return dance_to_id[name]
 	print "Input \"", name, "\" not a registered dance name"
 	return -1
+
+def get_dance_name(dance_id):
+	if dance_id in id_to_dance:
+		return id_to_dance[dance_id]
+	print "Input \"", str(dance_id), "\" not a registered dance ID"
+	return -1
+
+def get_dancer_name(dancer_id):
+	if dancer_id in id_to_name:
+		return id_to_name[dancer_id]
+	print "Input \"", dancer_id, "\" not a registered dancer ID"
+	return -1
+
+def get_dancer_id(name):
+	if name in name_to_id:
+		return name_to_id[name]
+	print "Input \"", name, "\" not a registered dancer name"
+	return -1
+
+def name_dict():
+	return name_to_id
 
 def assign_dance_ids(dance_names):
 	global dance_to_id
@@ -84,8 +106,47 @@ def read_dancer_data(filename = "data/dat_2019_fall.csv"): # reads in csv file o
 	return dancers
 
 
-def read_choreo_data(): # Figure out how to do choreographer data
-	return 1
+def read_choreo_data(dancers): # Figure out how to do choreographer data
+	# Make sure each number only appears once in each choreographer's sheet
+
+	filenames = ["data/alaisha_fall_2019.csv", 
+		"data/lani_fall_2019.csv",
+		"data/linda_fall_2019.csv",
+		"data/marisa_fall_2019.csv",
+		"data/mo_fall_2019.csv",
+		"data/nina_fall_2019.csv",
+		"data/sheila_fall_2019.csv",
+		"data/yg_fall_2019.csv"]
+
+	dance_caps = [30, 31, 32, 33, 34, 35, 36, 37]
+
+	dances = []
+
+	for f in range(len(filenames)):
+		dance_dat = np.array(pd.read_csv(filenames[f]))
+		arrs = [[], [], [], []]
+		track = []
+
+		for i in range(4):
+			for j in range(len(dance_dat)):
+				if math.isnan(dance_dat[j][i]):
+					break
+				else:
+					val = int(dance_dat[j][i])
+					if val in track:
+		#				print val, "appears twice for dance", f, "!"
+						pass
+					else:
+						track.append(val)
+						for dancer in dancers:
+							if dancer.ID == val:
+								arrs[i].append(dancer)
+								break
+
+		temp_obj = classes.dance(f, dance_caps[f], arrs)
+		dances.append(temp_obj)
+
+	return dances
 
 
 
