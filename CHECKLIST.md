@@ -11,3 +11,4 @@ Things to check before running:
 
 - Audition numbers are cleaned to unique integers
 - All dance names are being properly loaded with assign_dance_ids
+- Update max dance sizes

@@ -126,8 +126,6 @@ class dancer():
 			self.dances.append(slot)
 			return None
 
-		#return slot # temporarily turn off evicting
-
 		# not enough space, time to evict one
 
 		if slot.dance_id in self.willing:

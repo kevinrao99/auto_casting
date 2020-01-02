@@ -67,8 +67,8 @@ def read_dancer_data(filename = "data/dat_2019_fall.csv"): # reads in csv file o
 		except Exception, e:
 			print "Not all ids are ints:", id_dat[i][1]
 			continue
-		name_to_id[id_dat[i][0]] = id_as_int
-		id_to_name[id_as_int] = id_dat[i][0]
+		name_to_id[id_dat[i][0].strip()] = id_as_int
+		id_to_name[id_as_int] = id_dat[i][0].strip()
 
 	# select columns for willing to work, danced with expressions, 1 2 3 choices, dance cap, dancer id, times
 	relevant_dat = all_dat[:, [12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26, 27, 28]]
@@ -148,7 +148,42 @@ def read_choreo_data(dancers): # Figure out how to do choreographer data
 
 	return dances
 
+def write_cast_list(dances, filename = "data/cast_list.csv"):
 
+
+
+	name_list = []
+	for i in range(len(dances)):
+		name_list.append([])
+		name_list[i].append(get_dance_name(dances[i].ID))
+		for dancer_id in dances[i].dancer_ids:
+			temp = get_dancer_name(dancer_id)
+			if temp != -1:
+				name_list[i].append(temp)
+
+	for i in range(len(name_list)):
+		name_list[i] = name_list[i][0:1] + sorted(name_list[i][1:])
+
+	max_len = 0
+	for dance_list in name_list:
+		max_len = max(max_len, len(dance_list))
+
+	for dance_list in name_list:
+		while len(dance_list) < max_len:
+			dance_list.append("")
+
+
+	name_list = np.array(name_list)
+	for i in range(len(name_list)):
+		name_list[i] = np.array(name_list[i])
+
+	print name_list.shape
+	name_list = np.transpose(name_list)
+	print name_list.shape
+	
+	print len(name_list[0]), name_list[0]
+
+	pd.DataFrame(name_list).to_csv(filename)
 
 
 

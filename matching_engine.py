@@ -124,6 +124,8 @@ if __name__ == "__main__":
 	print slack_cts[2], "dancers got two less dances than their max"
 	print slack_cts[3], "dancers got three less dances than their max"
 
+	func.write_cast_list(dances)
+
 
 
 
