@@ -9,6 +9,8 @@ Things to check on audition form:
 
 Things to check before running:
 
+- Reading the correct columns from auditioners input sheet
 - Audition numbers are cleaned to unique integers
 - All dance names are being properly loaded with assign_dance_ids
+- All choreo sheet names are properly updated in read_choreo_data
 - Update max dance sizes

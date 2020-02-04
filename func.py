@@ -50,7 +50,7 @@ def assign_dance_ids(dance_names):
 	print
 
 
-def read_dancer_data(filename = "data/dat_2019_fall.csv"): # reads in csv file of audition form responses
+def read_dancer_data(filename = "data/dat_2020_spring.csv"): # reads in csv file of audition form responses
 	# edit appropriately based on the format of the audition form
 	global id_to_name
 	global name_to_id
@@ -58,7 +58,7 @@ def read_dancer_data(filename = "data/dat_2019_fall.csv"): # reads in csv file o
 	all_dat = np.array(pd.read_csv(filename))
 
 
-	id_dat = all_dat[:, [4, 21]] # We assume all ids are cleaned to unique integers
+	id_dat = all_dat[:, [4, 9]] # We assume all ids are cleaned to unique integers
 	name_to_id = dict([])
 	id_to_name = dict([])
 	for i in range(len(id_dat)):
@@ -67,36 +67,54 @@ def read_dancer_data(filename = "data/dat_2019_fall.csv"): # reads in csv file o
 		except Exception, e:
 			print "Not all ids are ints:", id_dat[i][1]
 			continue
+
+		if id_dat[i][0].strip() in name_to_id:
+			print "name:", id_dat[i][0].strip(), "appears twice in dancer data"
 		name_to_id[id_dat[i][0].strip()] = id_as_int
+
+		if id_as_int in id_to_name:
+			print "id:", id_as_int, "appears twice in dancer data"
 		id_to_name[id_as_int] = id_dat[i][0].strip()
 
 	# select columns for willing to work, danced with expressions, 1 2 3 choices, dance cap, dancer id, times
-	relevant_dat = all_dat[:, [12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26, 27, 28]]
+	relevant_dat = all_dat[:, 
+		[9, # Audition number
+		12,	# Danced with expressions
+		14, 15, 16, 17, 18, 19, 20, # days availability
+		21, # Willing to work
+		22, # First Choice
+		23, # Second Choice
+		24, # Third Choice
+		25, # How many pieces
+		]]
 
-	# Ignore time available for now
 
 	dancers = []
 
 	for i in range(len(relevant_dat)):
 		info_arr = []
 
-		work_arr = relevant_dat[i][0].split(", ")
+		work_arr = relevant_dat[i][9].split(", ")
 		work_arr = list(map(get_dance_id, work_arr))
 		info_arr.append(work_arr) # list of choreographers you're willing to work with
 
 		info_arr.append(relevant_dat[i][1] == "Yes") # whether you've danced with expressions
 
-		info_arr.append(get_dance_id(relevant_dat[i][2]))
-		info_arr.append(get_dance_id(relevant_dat[i][3]))
-		info_arr.append(get_dance_id(relevant_dat[i][4])) # First, second, third choice IDs
+		info_arr.append(get_dance_id(relevant_dat[i][10]))
+		info_arr.append(get_dance_id(relevant_dat[i][11]))
+		info_arr.append(get_dance_id(relevant_dat[i][12])) # First, second, third choice IDs
 
-		info_arr.append(int(relevant_dat[i][5])) # dance cap
+		info_arr.append(int(relevant_dat[i][13])) # dance cap
 
-		info_arr.append(int(relevant_dat[i][6])) # dancer audition number, to be used as dancer ID
+		info_arr.append(int(relevant_dat[i][0])) # dancer audition number, to be used as dancer ID
 
 		###########
 
-		# We ignore times for now
+		# Load times in an array
+
+		times_arr = relevant_dat[i][2:9]
+		info_arr.append(times_arr)
+
 
 		###########
 
@@ -109,16 +127,15 @@ def read_dancer_data(filename = "data/dat_2019_fall.csv"): # reads in csv file o
 def read_choreo_data(dancers): # Figure out how to do choreographer data
 	# Make sure each number only appears once in each choreographer's sheet
 
-	filenames = ["data/alaisha_fall_2019.csv", 
-		"data/lani_fall_2019.csv",
-		"data/linda_fall_2019.csv",
-		"data/marisa_fall_2019.csv",
-		"data/mo_fall_2019.csv",
-		"data/nina_fall_2019.csv",
-		"data/sheila_fall_2019.csv",
-		"data/yg_fall_2019.csv"]
+	filenames = ["data/amy_spring_2020.csv", 
+		"data/cecley_spring_2020.csv",
+		"data/emma_spring_2020.csv",
+		"data/gigi_spring_2020.csv",
+		"data/noah_spring_2020.csv",
+		"data/sarah_spring_2020.csv",
+		"data/yg_spring_2020.csv"]
 
-	dance_caps = [30, 31, 32, 33, 34, 35, 36, 37]
+	dance_caps = [35, 28, 30, 34, 20, 35, 34]
 
 	dances = []
 
@@ -129,12 +146,12 @@ def read_choreo_data(dancers): # Figure out how to do choreographer data
 
 		for i in range(4):
 			for j in range(len(dance_dat)):
-				if math.isnan(dance_dat[j][i]):
+				if math.isnan(dance_dat[j][i]): # check if at end of column
 					break
 				else:
 					val = int(dance_dat[j][i])
 					if val in track:
-		#				print val, "appears twice for dance", f, "!"
+						print val, "appears twice for dance", f, "!"
 						pass
 					else:
 						track.append(val)
@@ -148,18 +165,18 @@ def read_choreo_data(dancers): # Figure out how to do choreographer data
 
 	return dances
 
-def write_cast_list(dances, filename = "data/cast_list.csv"):
-
-
+def write_cast_list(dances, filename = "data/2020_spring_cast_list_alt.csv"):
 
 	name_list = []
 	for i in range(len(dances)):
 		name_list.append([])
 		name_list[i].append(get_dance_name(dances[i].ID))
 		for dancer_id in dances[i].dancer_ids:
+			if dancer_id == -1:
+				continue
 			temp = get_dancer_name(dancer_id)
 			if temp != -1:
-				name_list[i].append(temp)
+				name_list[i].append(temp + " " + str(dancer_id))
 
 	for i in range(len(name_list)):
 		name_list[i] = name_list[i][0:1] + sorted(name_list[i][1:])
@@ -177,11 +194,7 @@ def write_cast_list(dances, filename = "data/cast_list.csv"):
 	for i in range(len(name_list)):
 		name_list[i] = np.array(name_list[i])
 
-	print name_list.shape
 	name_list = np.transpose(name_list)
-	print name_list.shape
-	
-	print len(name_list[0]), name_list[0]
 
 	pd.DataFrame(name_list).to_csv(filename)
 

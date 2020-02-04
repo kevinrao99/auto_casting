@@ -14,9 +14,10 @@ def assign_slot(dance_slot):
 
 	if proposee is None:
 	#	print "Out of proposees!"
-		return dance_slot # We can ignore this return value because theres never any reason to propose to someone twice
+		return None # We can ignore this return value because theres never any reason to propose to someone twice
 
-	proposal_result = proposee.receive_proposal(dance_slot)
+	proposal_result = proposee.receive_proposal_edc(dance_slot)
+	# The above line can also be receive_proposal_smm, which uses stable marriage matching theory to receive proposals. See dancer class for more
 
 	if proposal_result is None:
 	#	print "Success!"
@@ -42,14 +43,13 @@ if __name__ == "__main__":
 	global dancers
 	global all_slots
 
-	dance_names = ['Alaisha Sharma', 
-		'Lani + Nina U.', 
-		'Linda Qin', 
-		'Marisa + Maureen', 
-		'Maureen', 
-		'Nina C. ft. Daniel', 
-		'Sheila De La Cruz', 
-		'YG']
+	dance_names = ['AMY WANG & KEVIN RAO', 
+		'CECLEY HILL', 
+		'EMMA ROBERTSON', 
+		'GIGI ZADES & ANNABEL BAXTER', 
+		'NOAH RAMOS',
+		'SARAH YOON & IFY OGU',
+		'YG OHASHI']
 	func.assign_dance_ids(dance_names)
 
 
@@ -70,6 +70,7 @@ if __name__ == "__main__":
 		assigning = all_slots.pop(assign_index)
 		assign_result = assign_slot(assigning)
 
+
 	for dance in dances:
 		print func.get_dance_name(dance.ID), " : ",
 		demo = [0, 0, 0, 0]
@@ -87,13 +88,6 @@ if __name__ == "__main__":
 		print "    ", demo[2], " Rank 3 dancers"
 		print "    ", demo[3], " Rank 4 dancers"
 
-		'''
-		for num in dance.dancer_ids:
-			if num == -1:
-				continue
-			print func.get_dancer_name(num)
-		print
-		'''
 
 	num_dances = [0, 0, 0, 0]
 	for dancer in dancers:
@@ -123,11 +117,55 @@ if __name__ == "__main__":
 	print slack_cts[1], "dancers got one less dance than their max"
 	print slack_cts[2], "dancers got two less dances than their max"
 	print slack_cts[3], "dancers got three less dances than their max"
+	print "\n \n"
 
 	func.write_cast_list(dances)
 
+	for dance in dances:
+		times_dict = dict([])
+		day_names = ["Mon ", "Tues ", "Wed ", "Thurs ", "Fri ", "Sat ", "Sun "]
 
+		for dancer_id in dance.dancer_ids:
+			if dancer_id == -1:
+				continue
 
+			dancer_obj = None
+			for temp_obj in dancers:
+				if temp_obj.ID == dancer_id:
+					dancer_obj = temp_obj
+					break
+
+			if dancer_obj is None:
+				print dancer_id, "NOT FOUND IN DANCERS!!"
+				continue
+
+			for j in range(len(dancer_obj.times_arr)):
+				times_as_arr = dancer_obj.times_arr[j].split(", ")
+				for time_str in times_as_arr:
+					dict_key = day_names[j] + time_str
+					if dict_key in times_dict:
+						times_dict[dict_key] += 1
+					else:
+						times_dict[dict_key] = 1
+
+		availability_arr = []
+		for dict_key in times_dict:
+			availability_arr.append((times_dict[dict_key], dict_key))
+
+		availability_arr.sort(reverse = True)
+
+		print func.get_dance_name(dance.ID), " top times : "
+		for i in range(5):
+			(a, b) = availability_arr[i]
+			print "    ", b, "  works for", a, "people"
+		print
+
+	for dance in dances:
+		print func.get_dance_name(dance.ID), "one to one matches:"
+		for dancer in dance.ranks[0]:
+			if dancer.choices[0] == dance.ID:
+				print "     ", func.get_dancer_name(dancer.ID)
+		print
 
 
 
